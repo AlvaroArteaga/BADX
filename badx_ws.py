@@ -3,8 +3,8 @@ from descarga_ifc import *
 def ws_aa(proceso,mes,ano,ruta):
     descarga(proceso,mes,ano,ruta)
 
-ws_aa('BADX','Octubre','2022','E:\GitHub\\test')
-
+#ws_aa('BADX','Octubre','2022','C:\GitHub\\test')
+ws_aa('BADX','Noviembre','2022',r'\\nas-cen1\D.Distribuidoras\Bot')
 
 
 # Marzo 2020

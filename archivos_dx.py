@@ -122,8 +122,11 @@ def func_ord(row):
 
 
 
-dir_badx='E:\GitHub\Coordinador_Electrico\BADX'
-dir_mes='E:\GitHub\Coordinador_Electrico\BADX\\2022\Octubre'
+#dir_badx='C:\GitHub\Coordinador_Electrico\BADX'
+#dir_mes='C:\GitHub\Coordinador_Electrico\BADX\\2022\Octubre'
+
+dir_badx=r'\\nas-cen1\D.Distribuidoras\Bot\BADX'
+dir_mes=r'\\nas-cen1\D.Distribuidoras\Bot\BADX\2022\\Noviembre'
 
 def listar_hojas():
     hojas=[]
@@ -314,7 +317,7 @@ for file in glob.glob(dir_mes+"\*.xlsx"):
                     
                     #df3.join(df1, how='outer')
                     #df3=df3.append(df1)
-with ExcelWriter(dir_badx+"\\badx_oct22_Medidas_Dx.xlsx") as writer:
+with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
                     df3.to_excel(writer,index=False, header=False)
                 
 

@@ -14,7 +14,7 @@ def descarga(proceso,mes,ano,ruta):
     prefs = {"download.default_directory" : ruta}
     options.add_experimental_option("prefs",prefs)
     options.headless = True
-    service = Service('E:\GitHub\Coordinador_Electrico\\2022\DBCD\BADX\webdriver\chromedriver.exe') 
+    service = Service('C:\GitHub\Coordinador_Electrico\\2022\DBCD\BADX\webdriver\chromedriver.exe') 
     driver = webdriver.Chrome(service=service, options=options)
     #driver = webdriver.Chrome(options=options)
 
