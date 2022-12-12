@@ -327,7 +327,12 @@ for file in glob.glob(dir_mes+"\*.xlsx"):
                     
                     #df3.join(df1, how='outer')
                     #df3=df3.append(df1)
+
+df_fr=df3[df3.columns[hojas[df3.iloc[[-10],:] == 'pmgds_fr']]]
+
+
 with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
+                    df_fr.to_excel(writer,index=False, header=False,sheet_name='FR')
                     df3.to_excel(writer,index=False, header=False,sheet_name='05_DX')
                 
 
