@@ -257,7 +257,14 @@ for file in glob.glob(dir_mes+"\*.xlsx"):
                         #df2 = pd.DataFrame(index=df1.index.drop_duplicates(keep='first'))
                         #df1=df1.append(df2)
                         #print('si')
-                 
+                #origen_dato_archivo
+                os.path.basename(file)
+                df1.loc[-11]=str(os.path.basename(file))
+                #origen_dato_hoja
+                df1.loc[-10]=hoja
+
+                df1.loc[[-11],[0]]='origen_dato_archivo'
+                df1.loc[[-10],[0]]='origen_dato_hoja'
          
                 #with ExcelWriter(dir_badx+"\\badx_oct22_"+str(i)+"_"+str(j)+".xlsx") as writer:
                 #    df1.to_excel(writer, hoja, index=True, header=True)
@@ -312,13 +319,16 @@ for file in glob.glob(dir_mes+"\*.xlsx"):
                             pass
                         
                     
+                    
+                   
+
                     df3=pd.concat([df3, df1.drop(df1.columns[0], axis='columns')], axis=1)
                     #df1 = df1.drop(df1.columns[0], axis='columns')
                     
                     #df3.join(df1, how='outer')
                     #df3=df3.append(df1)
 with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
-                    df3.to_excel(writer,index=False, header=False)
+                    df3.to_excel(writer,index=False, header=False,sheet_name='05_DX')
                 
 
 
