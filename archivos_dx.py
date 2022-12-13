@@ -6,7 +6,9 @@ from openpyxl import load_workbook
 from pandas import ExcelWriter
 import numpy as np
 import warnings
+from calendar import monthrange
 warnings.simplefilter(action='ignore', category=FutureWarning)
+import xlwings as xw
 
 hojas = {
 'Regulado SPD' : 'regulados',
@@ -337,7 +339,9 @@ res = row.map(hojas)
 #print(res.size)
 #res=res[res[0]==['pmgds_fr', 'pmgds_fr_nuevos']]
 res1 = res.loc[lambda x : (x =='pmgds_fr') | (x =='pmgds_fr_nuevos')]
-res2 = res.loc[lambda x : (x =='regulados') | (x =='regulados_reconv') | (x=='regulados_nuevos') | (x=='regulados_reconv_nuevos')]
+#res2 = res.loc[lambda x : (x =='regulados') | (x =='regulados_reconv') | (x=='regulados_nuevos') | (x=='regulados_reconv_nuevos')]
+res2_bloq = res.loc[lambda x : (x =='regulados') | (x=='regulados_nuevos')]
+res2_rec = res.loc[lambda x : (x =='regulados_reconv') | (x=='regulados_reconv_nuevos')]
 res3 = res.loc[lambda x : (x =='pmgds') | (x =='pmgds_nuevos')]
 res4 = res.loc[lambda x : (x =='pmgds_alimentadores')]
 
@@ -358,7 +362,19 @@ res4 = res.loc[lambda x : (x =='pmgds_alimentadores')]
 #print(res.index.values.tolist())
 df_fr=df3.iloc[:,[0]+res1.index.values.tolist()] 
 
-df5=df3.iloc[:,[0]+res2.index.values.tolist()] 
+#regulados
+df5=df3.iloc[:,[0]+res2_rec.index.values.tolist()] 
+#hojas
+
+df_bloq=df3.iloc[:,[0]+res2_bloq.index.values.tolist()].reset_index()
+row_b = df_bloq.iloc[1].reset_index(drop=True)  
+row_b2 = row_b.loc[lambda x : ('EEPA' in x ) | ('EMELCA' in x)]
+df_bloq_esp=df_bloq.iloc[:,[0]+row_b2.index.values.tolist()]
+
+df_bloq=df_bloq.iloc[:,list(set(row_b.index.values.tolist())-set(row_b2.index.values.tolist()))]
+
+
+
 df6=df3.iloc[:,[0]+res3.index.values.tolist()] 
 df7=df3.iloc[:,[0]+res4.index.values.tolist()] 
 
@@ -366,11 +382,33 @@ df4=df3.iloc[:,list(set(row.index.values.tolist())-set(res1.index.values.tolist(
 
 #381
 
+num_hrs = monthrange(2022,11)[1]*24+1
+
+
+
+df8=df_fr.iloc[12:num_hrs+11, 1:]
+dftemp2=df_fr.iloc[0:12, 1:]
+df8=df8.astype(float)
+df8=df8.fillna(1)
+#df8=df8.where(df8 <=0 , 1)
+
+df8 = pd.DataFrame(dftemp2, columns=df8.columns).append(df8)
+#df8=df8.join(df_fr.iloc[0:num_hrs+11, [0]],how= 'right')
+df8=df_fr.iloc[0:num_hrs+11, [0]].join(df8,how= 'left' )
 
 with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
-                    df_fr.to_excel(writer,index=False, header=False,sheet_name='FR')
+                    df8.to_excel(writer,index=False, header=False,sheet_name='FR')
                     df4.to_excel(writer,index=False, header=False,sheet_name='05_DX')
                     df5.to_excel(writer,index=False, header=False,sheet_name='06_REG')
                     df6.to_excel(writer,index=False, header=False,sheet_name='07_PMGD')
                     df7.to_excel(writer,index=False, header=False,sheet_name='Alimentadores_PMGD')
+                    df_fr.to_excel(writer,index=False, header=False,sheet_name='FR_original')
                 
+with xw.App() as app:
+    wb = xw.Book(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx")
+    wb.sheets['FR'].api.Tab.Color = 65280
+    wb.sheets['05_DX'].api.Tab.Color = 65280
+    wb.sheets['06_REG'].api.Tab.Color = 65280
+    wb.sheets['07_PMGD'].api.Tab.Color = 65280
+    wb.save()
+    wb.close()
