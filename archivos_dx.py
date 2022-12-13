@@ -328,13 +328,49 @@ for file in glob.glob(dir_mes+"\*.xlsx"):
                     #df3.join(df1, how='outer')
                     #df3=df3.append(df1)
 
-df_fr=df3[df3.columns[hojas[df3.iloc[[-10],:] == 'pmgds_fr']]]
+
+row = df3.iloc[2].reset_index(drop=True)           # extract first row as series
+res=[]
+#print(row)
+#print(row.size)
+res = row.map(hojas)
+#print(res.size)
+#res=res[res[0]==['pmgds_fr', 'pmgds_fr_nuevos']]
+res1 = res.loc[lambda x : (x =='pmgds_fr') | (x =='pmgds_fr_nuevos')]
+res2 = res.loc[lambda x : (x =='regulados') | (x =='regulados_reconv') | (x=='regulados_nuevos') | (x=='regulados_reconv_nuevos')]
+res3 = res.loc[lambda x : (x =='pmgds') | (x =='pmgds_nuevos')]
+res4 = res.loc[lambda x : (x =='pmgds_alimentadores')]
+
+
+#['pmgds_fr', 'pmgds_fr_nuevos']
+#.reset_index().set_index(res.index)
+#[lambda x : (x =='pmgds_fr') | (x =='pmgds_fr_nuevos')]
+#.isin(['pmgds_fr', 'pmgds_fr_nuevos'])
+#filter(items = ['pmgds_fr', 'pmgds_fr_nuevos'])
+#data.loc[lambda x : (x < 10) | (x > 20)]
+#my_series[my_series.isin([4, 7, 23])]
+
+#.filter(items = ['pmgds_fr', 'pmgds_fr_nuevos'])
+#print(res)
+#print(res.size)
+#df_fr=df3[res]
+#print('-------------')
+#print(res.index.values.tolist())
+df_fr=df3.iloc[:,[0]+res1.index.values.tolist()] 
+
+df5=df3.iloc[:,[0]+res2.index.values.tolist()] 
+df6=df3.iloc[:,[0]+res3.index.values.tolist()] 
+df7=df3.iloc[:,[0]+res4.index.values.tolist()] 
+
+df4=df3.iloc[:,list(set(row.index.values.tolist())-set(res1.index.values.tolist())-set(res2.index.values.tolist())-set(res3.index.values.tolist())-set(res4.index.values.tolist()))] 
+
+#381
 
 
 with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
                     df_fr.to_excel(writer,index=False, header=False,sheet_name='FR')
-                    df3.to_excel(writer,index=False, header=False,sheet_name='05_DX')
+                    df4.to_excel(writer,index=False, header=False,sheet_name='05_DX')
+                    df5.to_excel(writer,index=False, header=False,sheet_name='06_REG')
+                    df6.to_excel(writer,index=False, header=False,sheet_name='07_PMGD')
+                    df7.to_excel(writer,index=False, header=False,sheet_name='Alimentadores_PMGD')
                 
-
-
-
