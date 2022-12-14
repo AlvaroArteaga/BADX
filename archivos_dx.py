@@ -9,6 +9,7 @@ import warnings
 from calendar import monthrange
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import xlwings as xw
+import re
 
 hojas = {
 'Regulado SPD' : 'regulados',
@@ -363,22 +364,117 @@ res4 = res.loc[lambda x : (x =='pmgds_alimentadores')]
 df_fr=df3.iloc[:,[0]+res1.index.values.tolist()] 
 
 #regulados
-df5=df3.iloc[:,[0]+res2_rec.index.values.tolist()] 
+df5=df3.iloc[:,[0]+res2_bloq.index.values.tolist()+res2_rec.index.values.tolist()] 
 #hojas
+row_b=[]
+df_bloq=df3.iloc[:,[0]+res2_bloq.index.values.tolist()]
+row_b = df_bloq.iloc[1].reset_index(drop=True) 
+#row_b2 = row_b.loc[lambda x : ('EEPA' in x ) ]
+row_b2 = row_b.loc[lambda x : x.str.contains('EEPA')==True ]
 
-df_bloq=df3.iloc[:,[0]+res2_bloq.index.values.tolist()].reset_index()
-row_b = df_bloq.iloc[1].reset_index(drop=True)  
-row_b2 = row_b.loc[lambda x : ('EEPA' in x ) | ('EMELCA' in x)]
-df_bloq_esp=df_bloq.iloc[:,[0]+row_b2.index.values.tolist()]
 
-df_bloq=df_bloq.iloc[:,list(set(row_b.index.values.tolist())-set(row_b2.index.values.tolist()))]
+#dct = {re.compile('COSTANERA.*'): 'COSTANERA_____012', re.compile('LA_PINTANA.*'): 'LA_PINTANA____013', re.compile('P.ALTO.*'): 'P.ALTO________013'}
+
+
+dct={'COSTANERA_____012': 'COSTANERA_____012', 'LA_PINTANA____013': 'LA_PINTANA____013', 'P.ALTO________013': 'P.ALTO________013',
+'COSTANERA_____013': 'COSTANERA_____012', 'LA_PINTANA____014': 'LA_PINTANA____013', 'P.ALTO________014': 'P.ALTO________013',
+'COSTANERA_____014': 'COSTANERA_____012', 'LA_PINTANA____015': 'LA_PINTANA____013', 'P.ALTO________015': 'P.ALTO________013'
+}
+
+#clave={'COSTANERA_____012':'','LA_PINTANA____013':'', 'P.ALTO________013':''}
+
+
+
+
+#row_b3 = row_b.loc[lambda x : ('EMELCA' in x)]
+
+row_b3 = row_b.loc[lambda x : x.str.contains('EMELCA')==True ]
+
+df_bloq_eepa=df_bloq.iloc[:,row_b2.index.values.tolist()]
+df_bloq_emelca=df_bloq.iloc[:,row_b3.index.values.tolist()]
+
+#df_bloq_eepa.iloc[2]=df_bloq_eepa.iloc[2].replace(dct, regex=True)
+#print(df_bloq_eepa.iloc[4].map(dct))
+
+#df_bloq_eepa.iloc[4].replace(to_replace='P.ALTO________015', value = 'P.ALTO________013', inplace = True)
+df_bloq_eepa.iloc[4].replace(dct, inplace = True)
+#print('xxxxxxxxxxxx')
+#print(df_bloq_eepa.iloc[4])
+#df_bloq_eepa.iloc[2].replace(dct, regex=True,inplace = True)
+
+df_bloq_eepa=df_bloq_eepa.transpose()
+df_bloq_emelca=df_bloq_emelca.transpose()
+
+#df_bloq_eepa=df_bloq_eepa.groupby(df_bloq_eepa.iloc[:, 4],as_index=False).sum()
+df_bloq_eepa2=df_bloq_eepa.groupby(df_bloq_eepa.iloc[:, 4]).sum()
+df_bloq_emelca2=df_bloq_emelca.groupby(df_bloq_emelca.iloc[:, 4]).sum()
+
+
+#df_bloq_eepa2.iloc[0]=
+df_bloq_eepa2.iloc[:,1]=df_bloq_eepa.iloc[0,1]
+df_bloq_emelca2.iloc[:,1]=df_bloq_emelca.iloc[0,1]
+#print(df_bloq_eepa.iloc[0,1])
+df_bloq_eepa2.iloc[:,2]=df_bloq_eepa.iloc[0,2]
+df_bloq_emelca2.iloc[:,2]=df_bloq_emelca.iloc[0,2]
+#print(df_bloq_eepa.iloc[0,2])
+df_bloq_eepa2.iloc[:,3]=df_bloq_eepa.iloc[0,3]
+df_bloq_emelca2.iloc[:,3]=df_bloq_emelca.iloc[0,3]
+#print(df_bloq_eepa.iloc[0,3])
+df_bloq_eepa2.iloc[:,5]=df_bloq_eepa.iloc[0,5]
+df_bloq_emelca2.iloc[:,5]=df_bloq_emelca.iloc[0,5]
+
+df_bloq_eepa2.iloc[:,6]=df_bloq_eepa.iloc[0,6]
+df_bloq_emelca2.iloc[:,6]=df_bloq_emelca.iloc[0,6]
+
+
+df_bloq_eepa2.iloc[:,7]='EEPA'
+df_bloq_emelca2.iloc[:,7]='EMELCA'
+
+df_bloq_eepa2.iloc[:,9]= ''
+df_bloq_emelca2.iloc[:,9]= ''
+
+
+df_bloq_eepa2.iloc[:,11]=df_bloq_eepa.iloc[0,11]
+df_bloq_emelca2.iloc[:,11]=df_bloq_emelca.iloc[0,11]
+
+df_bloq_emelca2.iloc[0,0]='CBLANCA'
+
+
+for i in range(3):
+    if 'COSTANERA_____012' in df_bloq_eepa2.iloc[i,4]:
+        df_bloq_eepa2.iloc[i,4]= 'COSTANERA_____012'
+        df_bloq_eepa2.iloc[i,0]= 'EEPACOST'
+    elif 'LA_PINTANA____013' in df_bloq_eepa2.iloc[i,4]:
+        df_bloq_eepa2.iloc[i,4]= 'LA_PINTANA____013'
+        df_bloq_eepa2.iloc[i,0]='EEPAPINT'
+    elif 'P.ALTO________013' in df_bloq_eepa2.iloc[i,4]:
+        df_bloq_eepa2.iloc[i,4]= 'P.ALTO________013'
+        df_bloq_eepa2.iloc[i,0]= 'EEPAPTEA'
+
+
+
+#df_bloq_eepa=df_bloq_eepa.groupby(df_bloq_eepa.iloc[:, 4]).agg(lambda x : x.sum() if x.dtype=='float64' else list(set(x))[0])
+
+#df_bloq_eepa=df_bloq_eepa.groupby(df_bloq_eepa.iloc[:, 4],as_index=False).agg(lambda x : x.sum() if x.dtype=='float64' else list(set(x))[0])
+
+df_bloq_eepa=df_bloq_eepa2.transpose()
+df_bloq_emelca=df_bloq_emelca2.transpose()
+
+
+df_bloq=df_bloq.iloc[:,list(set(row_b.index.values.tolist())-set(row_b2.index.values.tolist())-set(row_b3.index.values.tolist()))]
+
+
+
+df_bloq=df_bloq.join(df_bloq_eepa,how= 'left', lsuffix='_izq1', rsuffix='_der1' )
+df_bloq=df_bloq.join(df_bloq_emelca,how= 'left', lsuffix='_izq2', rsuffix='_der2'  )
+df_bloq=df_bloq.join(df3.iloc[:,res2_rec.index.values.tolist()] ,how= 'left', lsuffix='_izq3', rsuffix='_der3'  )
 
 
 
 df6=df3.iloc[:,[0]+res3.index.values.tolist()] 
 df7=df3.iloc[:,[0]+res4.index.values.tolist()] 
 
-df4=df3.iloc[:,list(set(row.index.values.tolist())-set(res1.index.values.tolist())-set(res2.index.values.tolist())-set(res3.index.values.tolist())-set(res4.index.values.tolist()))] 
+df4=df3.iloc[:,list(set(row.index.values.tolist())-set(res1.index.values.tolist())-set(res2_bloq.index.values.tolist())-set(res2_rec.index.values.tolist())-set(res3.index.values.tolist())-set(res4.index.values.tolist()))] 
 
 #381
 
@@ -399,10 +495,11 @@ df8=df_fr.iloc[0:num_hrs+11, [0]].join(df8,how= 'left' )
 with ExcelWriter(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx") as writer:
                     df8.to_excel(writer,index=False, header=False,sheet_name='FR')
                     df4.to_excel(writer,index=False, header=False,sheet_name='05_DX')
-                    df5.to_excel(writer,index=False, header=False,sheet_name='06_REG')
+                    df_bloq.to_excel(writer,index=False, header=False,sheet_name='06_REG')
                     df6.to_excel(writer,index=False, header=False,sheet_name='07_PMGD')
                     df7.to_excel(writer,index=False, header=False,sheet_name='Alimentadores_PMGD')
                     df_fr.to_excel(writer,index=False, header=False,sheet_name='FR_original')
+                    df5.to_excel(writer,index=False, header=False,sheet_name='06_REG_original')
                 
 with xw.App() as app:
     wb = xw.Book(dir_badx+"\\badx_nov22_Medidas_Dx.xlsx")
